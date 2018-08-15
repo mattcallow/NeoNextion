@@ -3,6 +3,7 @@
 #include "Nextion.h"
 #include "INextionTouchable.h"
 
+
 /*!
  * \brief Creates a new device driver.
  * \param stream Stream (serial port) the device is connected to
@@ -24,13 +25,13 @@ Nextion::Nextion(Stream &stream, bool flushSerialBeforeTx)
 bool Nextion::init()
 {
   sendCommand("");
-
+  yield();
   sendCommand("bkcmd=1");
   bool result1 = checkCommandComplete();
-
+  yield();
   sendCommand("page 0");
   bool result2 = checkCommandComplete();
-
+  yield();
   return (result1 && result2);
 }
 
@@ -338,7 +339,7 @@ void Nextion::registerTouchable(INextionTouchable *touchable)
  * \brief Sends a command to the device.
  * \param command Command to send
  */
-void Nextion::sendCommand(char *command)
+void Nextion::sendCommand(const char *command)
 {
   if (m_flushSerialBeforeTx)
     m_serialPort.flush();
@@ -443,4 +444,66 @@ size_t Nextion::receiveString(char *buffer, size_t len)
   pos++;
   buffer[pos] = '\0';
   return pos;
+}
+
+bool Nextion::uploadFile(const char *fileName, int baudrate, Syslog &syslog)
+{
+    uint8_t c;
+    int ret = -1;
+    File file = SPIFFS.open(fileName, "r");
+    size_t sz = file.size();
+    syslog.logf(LOG_INFO, "Loading file %s size %d", fileName, sz);
+    Serial.printf("Loading file %s size %d", fileName, sz);
+    String string = String("");
+    int blocks_to_send = sz / 4096 + 1;
+    int last_block_size = sz % 4096;
+    String filesize_str = String(sz, 10);
+    String baudrate_str = String(baudrate, 10);
+    String cmd = String();
+    cmd = "whmi-wri " + filesize_str + "," + baudrate_str + ",0";
+    syslog.logf(LOG_INFO, "cmd=%s", cmd.c_str());
+    sendCommand(cmd.c_str());
+    uint32_t start = millis();
+    ret = -1;
+    while ((ret == -1) && (millis() - start <= 500))
+    {
+      if (m_serialPort.available())
+      {
+        ret = m_serialPort.read();
+        Serial.printf("Response was %d\n", ret);
+      }
+    }
+
+    while(blocks_to_send)
+    {
+        int bytes_to_send;
+        if (blocks_to_send == 1) {
+          bytes_to_send = last_block_size;
+        } else {
+          bytes_to_send = 4096;
+        }
+        Serial.printf("blocks_to_send=%d [%d bytes] ", blocks_to_send, bytes_to_send);
+        for(int j = 0; j < bytes_to_send; j++)
+        {
+          m_serialPort.write(file.read());
+        }
+        uint32_t start = millis();
+        ret = -1;
+        while ((ret == -1) && (millis() - start <= 500))
+        {
+          if (m_serialPort.available())
+          {
+            ret = m_serialPort.read();
+          }
+        }
+        Serial.printf("Response was %d\n", ret);
+        if(ret != 0x05)
+        {
+          file.close();
+          return false;
+        }
+         --blocks_to_send;
+    }
+    file.close();
+    return true;
 }

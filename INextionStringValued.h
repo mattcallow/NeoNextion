@@ -43,7 +43,7 @@ public:
    * \return True if successful
    * \see INextionStringValued::getText
    */
-  bool setText(char *buffer)
+  bool setText(const char *buffer)
   {
     return setStringProperty("txt", buffer);
   }

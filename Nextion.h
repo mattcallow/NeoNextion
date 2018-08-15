@@ -7,7 +7,12 @@
 #include "application.h"
 extern char *itoa(int a, char *buffer, unsigned char radix);
 #else
+
 #include <Arduino.h>
+#if defined(ESP8266)
+#include <FS.h>
+#include <Syslog.h>
+#endif
 #endif
 
 #include "NextionTypes.h"
@@ -63,10 +68,11 @@ public:
   bool drawCircle(uint16_t x, uint16_t y, uint16_t r, uint32_t colour);
 
   void registerTouchable(INextionTouchable *touchable);
-  void sendCommand(char *command);
+  void sendCommand(const char *command);
   bool checkCommandComplete();
   bool receiveNumber(uint32_t *number);
   size_t receiveString(char *buffer, size_t len);
+  bool uploadFile(const char *fileName, int baudrate, Syslog &syslog);
 
 private:
   Stream &m_serialPort;       //!< Serial port device is attached to

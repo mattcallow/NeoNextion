@@ -42,7 +42,7 @@ uint8_t INextionWidget::getComponentID()
  * \param value Value
  * \return True if successful
  */
-bool INextionWidget::setNumberProperty(char *propertyName, uint32_t value)
+bool INextionWidget::setNumberProperty(const char *propertyName, uint32_t value)
 {
   size_t commandLen = 8 + strlen(m_name) + strlen(propertyName);
   char commandBuffer[commandLen];
@@ -55,7 +55,7 @@ bool INextionWidget::setNumberProperty(char *propertyName, uint32_t value)
  * \param propertyName Name of the property
  * \return Value (may also return 0 in case of error)
  */
-uint32_t INextionWidget::getNumberProperty(char *propertyName)
+uint32_t INextionWidget::getNumberProperty(const char *propertyName)
 {
   size_t commandLen = 7 + strlen(m_name) + strlen(propertyName);
   char commandBuffer[commandLen];
@@ -74,7 +74,7 @@ uint32_t INextionWidget::getNumberProperty(char *propertyName)
  * \param value Value
  * \return True if successful
  */
-bool INextionWidget::setStringProperty(char *propertyName, char *value)
+bool INextionWidget::setStringProperty(const char *propertyName, const char *value)
 {
   size_t commandLen = 7 + strlen(m_name) + strlen(propertyName) + strlen(value);
   char command[commandLen];
@@ -89,7 +89,7 @@ bool INextionWidget::setStringProperty(char *propertyName, char *value)
  * \param len Maximum length of value
  * \return Actual length of value
  */
-size_t INextionWidget::getStringProperty(char *propertyName, char *value,
+size_t INextionWidget::getStringProperty(const char *propertyName, char *value,
                                          size_t len)
 {
   size_t commandLen = 6 + strlen(m_name) + strlen(propertyName);
@@ -99,7 +99,7 @@ size_t INextionWidget::getStringProperty(char *propertyName, char *value,
   return m_nextion.receiveString(value, len);
 }
 
-bool INextionWidget::sendCommand(char *commandStr, bool checkComplete)
+bool INextionWidget::sendCommand(const char *commandStr, bool checkComplete)
 {
   m_nextion.sendCommand(commandStr);
 

@@ -106,7 +106,7 @@ uint32_t INextionColourable::getEventBackgroundColour()
  * \param refresh If the widget should be refreshed
  * \return True if successful
  */
-bool INextionColourable::setColour(char *type, uint32_t colour, bool refresh)
+bool INextionColourable::setColour(const char *type, uint32_t colour, bool refresh)
 {
   return afterSet(setNumberProperty(type, colour), refresh);
 }
@@ -117,7 +117,7 @@ bool INextionColourable::setColour(char *type, uint32_t colour, bool refresh)
  * \return Colour (may also return 0 in case of error)
  * \see INextionColourable::setColour
  */
-uint32_t INextionColourable::getColour(char *type)
+uint32_t INextionColourable::getColour(const char *type)
 {
   return getNumberProperty(type);
 }
